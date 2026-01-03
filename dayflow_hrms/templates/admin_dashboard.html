@@ -1,13 +1,176 @@
-<h2>Admin Dashboard</h2>
+{% extends 'base.html' %}
 
-{% for l in leaves %}
-<form method="post">
-    {{ l[1] }} - {{ l[2] }} - {{ l[3] }}
-    <input type="hidden" name="leave_id" value="{{ l[0] }}">
-    <select name="status">
-        <option value="approved">Approve</option>
-        <option value="rejected">Reject</option>
-    </select>
-    <button>Submit</button>
-</form>
-{% endfor %}
+{% block title %}Admin Dashboard - DayFlow HRMS{% endblock %}
+
+{% block content %}
+<div class="card" style="margin-bottom: 2rem;">
+    <div class="card-header">
+        <h3 class="card-title">Leave Requests Management</h3>
+    </div>
+    <div class="table-container">
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Employee</th>
+                    <th>Type</th>
+                    <th>Dates</th>
+                    <th>Reason</th>
+                    <th>Status</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for leave in leaves %}
+                <tr>
+                    <td>
+                        <div style="font-weight: 500;">{{ leave.user_name }}</div>
+                        <!-- <div style="font-size: 0.8em; color: var(--text-muted);">ID: {{ leave.user_id }}</div> -->
+                    </td>
+                    <td>{{ leave.leave_type }}</td>
+                    <td>
+                        <div style="white-space: nowrap;">{{ leave.start_date }}</div>
+                        <div style="white-space: nowrap; color: var(--text-muted);">to {{ leave.end_date }}</div>
+                    </td>
+                    <td>
+                        <div style="max-width: 200px;">{{ leave.reason }}</div>
+                        {% if leave.admin_comment %}
+                        <div
+                            style="margin-top: 0.5rem; font-size: 0.9em; padding: 0.5rem; background: #F3F4F6; border-radius: 4px;">
+                            <strong>Admin:</strong> {{ leave.admin_comment }}
+                        </div>
+                        {% endif %}
+                    </td>
+                    <td>
+                        <span class="badge badge-{{ leave.status }}">{{ leave.status }}</span>
+                    </td>
+                    <td>
+                        {% if leave.status == 'pending' %}
+                        <form action="{{ url_for('admin_dashboard') }}" method="post"
+                            style="display: flex; flex-direction: column; gap: 0.5rem;">
+                            <input type="hidden" name="leave_id" value="{{ leave.id }}">
+                            <input type="text" name="admin_comment" class="form-input" placeholder="Comment..."
+                                style="padding: 0.4rem; font-size: 0.9em;">
+                            <div style="display: flex; gap: 0.5rem;">
+                                <button type="submit" name="status" value="approved" class="btn btn-sm btn-success"
+                                    style="flex: 1;">Approve</button>
+                                <button type="submit" name="status" value="rejected" class="btn btn-sm btn-danger"
+                                    style="flex: 1;">Reject</button>
+                            </div>
+                        </form>
+                        {% else %}
+                        <span style="color: var(--text-muted); font-size: 0.9em;">Processed</span>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% else %}
+                <tr>
+                    <td colspan="6" style="text-align: center; color: var(--text-muted);">No leave requests found.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<div class="card" style="margin-bottom: 2rem;">
+    <div class="card-header">
+        <h3 class="card-title">Attendance History</h3>
+    </div>
+    <div class="table-container">
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Date</th>
+                    <th>Employee</th>
+                    <th>Clock In</th>
+                    <th>Clock Out</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for log in attendance_history %}
+                <tr>
+                    <td>{{ log.date }}</td>
+                    <td>{{ log.name }}</td>
+                    <td><span class="badge badge-approved">{{ log.clock_in }}</span></td>
+                    <td>
+                        {% if log.clock_out %}
+                        <span class="badge badge-rejected">{{ log.clock_out }}</span>
+                        {% else %}
+                        <span class="badge badge-pending">Active</span>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% else %}
+                <tr>
+                    <td colspan="4" style="text-align: center; color: var(--text-muted);">No records found.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<div class="dashboard-grid">
+    <div class="card">
+        <div class="card-header">
+            <h3 class="card-title">Who's In Today</h3>
+        </div>
+        <div class="table-container">
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Employee</th>
+                        <th>Clock In</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for active in active_employees %}
+                    <tr>
+                        <td>{{ active.name }}</td>
+                        <td>{{ active.clock_in }}</td>
+                    </tr>
+                    {% else %}
+                    <tr>
+                        <td colspan="2" style="text-align: center; color: var(--text-muted);">No one is clocked in yet.
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="card-header">
+            <h3 class="card-title">All Employees</h3>
+        </div>
+        <div class="table-container">
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Name</th>
+                        <th>Email</th>
+                        <th>Role</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for emp in employees %}
+                    <tr>
+                        <td>#{{ emp.id }}</td>
+                        <td>
+                            <div style="font-weight: 500;">{{ emp.name }}</div>
+                        </td>
+                        <td>{{ emp.email }}</td>
+                        <td><span class="badge badge-employee">{{ emp.role }}</span></td>
+                    </tr>
+                    {% else %}
+                    <tr>
+                        <td colspan="4" style="text-align: center; color: var(--text-muted);">No employees found.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+    {% endblock %}

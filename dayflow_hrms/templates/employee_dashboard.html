@@ -1,14 +1,143 @@
-<h2>Employee Dashboard</h2>
+{% extends 'base.html' %}
 
-<form method="post">
-    <input name="leave_type" placeholder="Leave Type">
-    <input name="start_date" type="date">
-    <input name="end_date" type="date">
-    <textarea name="reason"></textarea>
-    <button>Apply Leave</button>
-</form>
+{% block title %}Employee Dashboard - DayFlow HRMS{% endblock %}
 
-<h3>My Leaves</h3>
-{% for l in leaves %}
-<p>{{ l[2] }} - {{ l[6] }}</p>
-{% endfor %}
+{% block content %}
+<div class="dashboard-grid">
+    <!-- Attendance Card -->
+    <div class="card">
+        <div class="card-header">
+            <h3 class="card-title">Attendance</h3>
+        </div>
+        <div style="text-align: center;">
+            <div style="font-size: 2rem; font-weight: 700; color: var(--text-main); margin-bottom: 0.5rem;"
+                id="time-display">--:--:--</div>
+            <div style="color: var(--text-muted); margin-bottom: 1.5rem;">{{ attendance.date if attendance else 'Today'
+                }}</div>
+
+            {% if not attendance %}
+            <form action="{{ url_for('clock_in') }}" method="post">
+                <button type="submit" class="btn btn-primary btn-block">Clock In</button>
+            </form>
+            {% elif not attendance.clock_out %}
+            <div style="margin-bottom: 1rem; color: var(--secondary);">Clocked in at {{ attendance.clock_in }}</div>
+            <form action="{{ url_for('clock_out') }}" method="post">
+                <button type="submit" class="btn btn-danger btn-block">Clock Out</button>
+            </form>
+            {% else %}
+            <div style="color: var(--text-muted);">
+                <div>In: {{ attendance.clock_in }}</div>
+                <div>Out: {{ attendance.clock_out }}</div>
+                <div style="margin-top: 1rem; font-weight: 600; color: var(--secondary);">Day Completed</div>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Profile Card -->
+    <div class="card">
+        <div class="card-header">
+            <h3 class="card-title">My Profile</h3>
+        </div>
+        <div class="profile-info">
+            <div class="info-item">
+                <span class="info-label">Name</span>
+                <span class="info-value">{{ user.name }}</span>
+            </div>
+            <div class="info-item">
+                <span class="info-label">Email</span>
+                <span class="info-value">{{ user.email }}</span>
+            </div>
+            <div class="info-item">
+                <span class="info-label">Role</span>
+                <span class="info-value"><span class="badge badge-employee">Employee</span></span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Apply Leave Card -->
+    <div class="card">
+        <div class="card-header">
+            <h3 class="card-title">Apply for Leave</h3>
+        </div>
+        <form action="{{ url_for('employee_dashboard') }}" method="post">
+            <div class="form-group">
+                <label for="leave_type" class="form-label">Leave Type</label>
+                <select name="leave_type" id="leave_type" class="form-select">
+                    <option value="Paid Leave">Paid Leave</option>
+                    <option value="Sick Leave">Sick Leave</option>
+                    <option value="Unpaid Leave">Unpaid Leave</option>
+                </select>
+            </div>
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                <div class="form-group">
+                    <label for="start_date" class="form-label">Start Date</label>
+                    <input type="date" name="start_date" id="start_date" class="form-input" required>
+                </div>
+                <div class="form-group">
+                    <label for="end_date" class="form-label">End Date</label>
+                    <input type="date" name="end_date" id="end_date" class="form-input" required>
+                </div>
+            </div>
+            <div class="form-group">
+                <label for="reason" class="form-label">Reason</label>
+                <textarea name="reason" id="reason" class="form-textarea" rows="3"
+                    placeholder="Brief reason for your leave..." required></textarea>
+            </div>
+            <button type="submit" class="btn btn-primary btn-block">Submit Request</button>
+        </form>
+    </div>
+</div>
+
+<!-- Leave Requests Table -->
+<div class="card">
+    <div class="card-header">
+        <h3 class="card-title">My Leave Requests</h3>
+    </div>
+    <div class="table-container">
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Type</th>
+                    <th>Dates</th>
+                    <th>Reason</th>
+                    <th>Status</th>
+                    <th>Admin Comment</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for leave in leaves %}
+                <tr>
+                    <td>{{ leave.leave_type }}</td>
+                    <td>{{ leave.start_date }} to {{ leave.end_date }}</td>
+                    <td>{{ leave.reason }}</td>
+                    <td>
+                        <span class="badge badge-{{ leave.status }}">{{ leave.status }}</span>
+                    </td>
+                    <td>
+                        {% if leave.admin_comment %}
+                        {{ leave.admin_comment }}
+                        {% else %}
+                        <span style="color: var(--text-muted);">-</span>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% else %}
+                <tr>
+                    <td colspan="5" style="text-align: center; color: var(--text-muted);">No leave requests found.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<script>
+    function updateTime() {
+        const now = new Date();
+        document.getElementById('time-display').innerText = now.toLocaleTimeString();
+    }
+    setInterval(updateTime, 1000);
+    updateTime();
+</script>
+{% endblock %}

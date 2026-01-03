@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}DayFlow HRMS{% endblock %}</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+
+<body>
+    <nav class="navbar">
+        <div class="container nav-container">
+            <a href="/" class="nav-brand">DayFlow HRMS</a>
+            <div class="nav-links">
+                {% if session.loggedin %}
+                {% if session.role == 'admin' %}
+                <a href="{{ url_for('admin_dashboard') }}" class="nav-link">Dashboard</a>
+                {% else %}
+                <a href="{{ url_for('employee_dashboard') }}" class="nav-link">Dashboard</a>
+                {% endif %}
+                <span class="nav-link">Hi, {{ session.name }}</span>
+                <a href="{{ url_for('logout') }}" class="btn-nav">Logout</a>
+                {% else %}
+                <a href="{{ url_for('login') }}" class="nav-link">Login</a>
+                <a href="{{ url_for('register') }}" class="btn-nav">Sign Up</a>
+                {% endif %}
+            </div>
+        </div>
+    </nav>
+
+    <main class="container main-content">
+        {% block content %}{% endblock %}
+    </main>
+
+    <script>
+        // Optional: Add simple JS for interactions if needed, e.g. closing alerts
+    </script>
+</body>
+
+</html>
