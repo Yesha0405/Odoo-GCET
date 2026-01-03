@@ -1,0 +1,13 @@
+<h2>Admin Dashboard</h2>
+
+{% for l in leaves %}
+<form method="post">
+    {{ l[1] }} - {{ l[2] }} - {{ l[3] }}
+    <input type="hidden" name="leave_id" value="{{ l[0] }}">
+    <select name="status">
+        <option value="approved">Approve</option>
+        <option value="rejected">Reject</option>
+    </select>
+    <button>Submit</button>
+</form>
+{% endfor %}

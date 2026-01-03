@@ -1,0 +1,14 @@
+<h2>Employee Dashboard</h2>
+
+<form method="post">
+    <input name="leave_type" placeholder="Leave Type">
+    <input name="start_date" type="date">
+    <input name="end_date" type="date">
+    <textarea name="reason"></textarea>
+    <button>Apply Leave</button>
+</form>
+
+<h3>My Leaves</h3>
+{% for l in leaves %}
+<p>{{ l[2] }} - {{ l[6] }}</p>
+{% endfor %}
