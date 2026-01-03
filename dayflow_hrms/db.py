@@ -40,7 +40,14 @@ def _create_tables():
             name VARCHAR(100) NOT NULL,
             email VARCHAR(100) UNIQUE NOT NULL,
             password VARCHAR(255) NOT NULL,
-            role ENUM('employee', 'admin') DEFAULT 'employee'
+            role ENUM('employee', 'admin') DEFAULT 'employee',
+            employee_id VARCHAR(50), -- Using this as the 'Login ID'
+            company_name VARCHAR(100),
+            joining_date DATE,
+            phone VARCHAR(20),
+            address TEXT,
+            job_title VARCHAR(100),
+            salary DECIMAL(10, 2) DEFAULT 0.00
         )
     ''')
     
@@ -59,7 +66,6 @@ def _create_tables():
         )
     ''')
     
-    # Attendance table
     cursor.execute('''
         CREATE TABLE IF NOT EXISTS attendance (
             id INT AUTO_INCREMENT PRIMARY KEY,
@@ -72,11 +78,40 @@ def _create_tables():
         )
     ''')
 
+    # Payroll table
+    cursor.execute('''
+        CREATE TABLE IF NOT EXISTS payroll (
+            id INT AUTO_INCREMENT PRIMARY KEY,
+            user_id INT,
+            month VARCHAR(20),
+            year INT,
+            base_salary DECIMAL(10, 2),
+            bonus DECIMAL(10, 2) DEFAULT 0.00,
+            deductions DECIMAL(10, 2) DEFAULT 0.00,
+            net_salary DECIMAL(10, 2),
+            status ENUM('paid', 'pending') DEFAULT 'pending',
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            FOREIGN KEY (user_id) REFERENCES users(id)
+        )
+    ''')
+
     # Simple migration to ensure admin_comment exists if table was already created
     try:
         cursor.execute("ALTER TABLE leaves ADD COLUMN admin_comment TEXT")
     except:
         pass # Column likely already exists
+        
+    try:
+        cursor.execute("ALTER TABLE users ADD COLUMN salary DECIMAL(10, 2) DEFAULT 0.00")
+    except:
+        pass # Column likely already exists
+        
+    # Migration for new profile fields
+    for col in ['employee_id VARCHAR(50) UNIQUE', 'phone VARCHAR(20)', 'address TEXT', 'job_title VARCHAR(100)', 'company_name VARCHAR(100)', 'joining_date DATE']:
+        try:
+            cursor.execute(f"ALTER TABLE users ADD COLUMN {col}")
+        except:
+            pass
     
     mysql.connection.commit()
     cursor.close()

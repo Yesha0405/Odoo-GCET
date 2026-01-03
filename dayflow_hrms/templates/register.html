@@ -11,31 +11,45 @@
         <div class="alert alert-error">{{ msg }}</div>
         {% endif %}
 
-        <form action="{{ url_for('register') }}" method="post">
-            <div class="form-group">
-                <label for="name" class="form-label">Full Name</label>
-                <input type="text" name="name" id="name" class="form-input" placeholder="John Doe" required>
+        <div style="text-align: center; margin-bottom: 2rem;">
+            <div
+                style="background: #2D2D2D; color: #666; padding: 10px; border-radius: 6px; display: inline-block; width: 200px;">
+                App/Web Logo</div>
+        </div>
+
+        <form action="{{ url_for('register') }}" method="post" enctype="multipart/form-data">
+            <div class="form-group" style="position: relative;">
+                <label for="company_name" class="form-label">Company Name :-</label>
+                <input type="text" name="company_name" id="company_name" class="form-input" required>
+                <!-- Placeholder for logo upload icon -->
+                <span style="position: absolute; right: 10px; top: 35px; color: #00A3FF; cursor: pointer;">
+                    <i class="fas fa-upload"></i>
+                </span>
             </div>
 
             <div class="form-group">
-                <label for="email" class="form-label">Email Address</label>
-                <input type="email" name="email" id="email" class="form-input" placeholder="you@company.com" required>
+                <label for="name" class="form-label">Name :-</label>
+                <input type="text" name="name" id="name" class="form-input" required>
             </div>
 
             <div class="form-group">
-                <label for="password" class="form-label">Password</label>
-                <input type="password" name="password" id="password" class="form-input" placeholder="••••••••" required>
+                <label for="email" class="form-label">Email :-</label>
+                <input type="email" name="email" id="email" class="form-input" required>
             </div>
 
             <div class="form-group">
-                <label for="role" class="form-label">Role</label>
-                <select name="role" id="role" class="form-select">
-                    <option value="employee">Employee</option>
-                    <option value="admin">Admin / HR</option>
-                </select>
+                <label for="phone" class="form-label">Phone :-</label>
+                <input type="text" name="phone" id="phone" class="form-input" required>
             </div>
 
-            <button type="submit" class="btn btn-primary btn-block">Create Account</button>
+            <div class="form-group">
+                <label for="password" class="form-label">Password :-</label>
+                <input type="password" name="password" id="password" class="form-input" required>
+            </div>
+
+            <!-- Confirm Password omitted for brevity/functionality match, can add later -->
+
+            <button type="submit" class="btn btn-primary btn-block">Sign Up</button>
         </form>
 
         <p style="margin-top: 1.5rem; text-align: center; color: var(--text-muted);">

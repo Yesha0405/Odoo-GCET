@@ -35,14 +35,17 @@
     </div>
 
     <!-- Profile Card -->
-    <div class="card">
+    <div class="card profile-card">
         <div class="card-header">
             <h3 class="card-title">My Profile</h3>
+            <button class="btn btn-sm btn-nav"
+                onclick="document.getElementById('editProfileModal').style.display='block'"
+                style="float: right;">Edit</button>
         </div>
         <div class="profile-info">
             <div class="info-item">
                 <span class="info-label">Name</span>
-                <span class="info-value">{{ user.name }}</span>
+                <span class="info-value">{{ user.name }} (ID: {{ user.employee_id or 'N/A' }})</span>
             </div>
             <div class="info-item">
                 <span class="info-label">Email</span>
@@ -50,8 +53,41 @@
             </div>
             <div class="info-item">
                 <span class="info-label">Role</span>
-                <span class="info-value"><span class="badge badge-employee">Employee</span></span>
+                <span class="info-value"><span class="badge badge-employee">{{ user.job_title or user.role|title
+                        }}</span></span>
             </div>
+            <div class="info-item">
+                <span class="info-label">Phone</span>
+                <span class="info-value">{{ user.phone or 'Not Set' }}</span>
+            </div>
+            <div class="info-item">
+                <span class="info-label">Address</span>
+                <span class="info-value">{{ user.address or 'Not Set' }}</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Edit Profile Modal -->
+    <div id="editProfileModal" class="modal"
+        style="display:none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; overflow: auto; background-color: rgba(0,0,0,0.5);">
+        <div class="modal-content"
+            style="background-color: white; margin: 10% auto; padding: 20px; border-radius: 8px; width: 90%; max-width: 500px; position: relative;">
+            <span onclick="document.getElementById('editProfileModal').style.display='none'"
+                style="float: right; font-size: 24px; cursor: pointer;">&times;</span>
+            <h3 style="margin-bottom: 1rem;">Edit Contact Details</h3>
+            <form action="{{ url_for('update_profile') }}" method="post">
+                <div class="form-group">
+                    <label class="form-label">Phone Number</label>
+                    <input type="text" name="phone" class="form-input" value="{{ user.phone or '' }}"
+                        placeholder="Enter phone number">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Address</label>
+                    <textarea name="address" class="form-input" rows="3"
+                        placeholder="Enter your address">{{ user.address or '' }}</textarea>
+                </div>
+                <button type="submit" class="btn btn-primary btn-block">Save Changes</button>
+            </form>
         </div>
     </div>
 
@@ -125,6 +161,42 @@
                 {% else %}
                 <tr>
                     <td colspan="5" style="text-align: center; color: var(--text-muted);">No leave requests found.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-header">
+        <h3 class="card-title">My Payroll</h3>
+    </div>
+    <div class="table-container">
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Month/Year</th>
+                    <th>Base Salary</th>
+                    <th>Bonus</th>
+                    <th>Deductions</th>
+                    <th>Net Salary</th>
+                    <th>Status</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for pay in payrolls %}
+                <tr>
+                    <td>{{ pay.month }} {{ pay.year }}</td>
+                    <td>${{ pay.base_salary }}</td>
+                    <td><span class="badge badge-approved">+${{ pay.bonus }}</span></td>
+                    <td><span class="badge badge-rejected">-${{ pay.deductions }}</span></td>
+                    <td style="font-weight: 700;">${{ pay.net_salary }}</td>
+                    <td><span class="badge badge-{{ pay.status }}">{{ pay.status }}</span></td>
+                </tr>
+                {% else %}
+                <tr>
+                    <td colspan="6" style="text-align: center; color: var(--text-muted);">No payroll records found.</td>
                 </tr>
                 {% endfor %}
             </tbody>

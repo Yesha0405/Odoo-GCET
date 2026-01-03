@@ -140,37 +140,169 @@
         </div>
     </div>
 
+    <!-- Payroll Management Card -->
     <div class="card">
         <div class="card-header">
-            <h3 class="card-title">All Employees</h3>
+            <h3 class="card-title">Generate Payroll</h3>
         </div>
-        <div class="table-container">
-            <table class="table">
-                <thead>
-                    <tr>
-                        <th>ID</th>
-                        <th>Name</th>
-                        <th>Email</th>
-                        <th>Role</th>
-                    </tr>
-                </thead>
-                <tbody>
+        <form action="{{ url_for('generate_payroll') }}" method="post">
+            <div class="form-group">
+                <label class="form-label">Employee</label>
+                <select name="user_id" class="form-select" required>
                     {% for emp in employees %}
-                    <tr>
-                        <td>#{{ emp.id }}</td>
-                        <td>
-                            <div style="font-weight: 500;">{{ emp.name }}</div>
-                        </td>
-                        <td>{{ emp.email }}</td>
-                        <td><span class="badge badge-employee">{{ emp.role }}</span></td>
-                    </tr>
-                    {% else %}
-                    <tr>
-                        <td colspan="4" style="text-align: center; color: var(--text-muted);">No employees found.</td>
-                    </tr>
+                    <option value="{{ emp.id }}">{{ emp.name }} (Current: ${{ emp.salary or 0 }})</option>
                     {% endfor %}
-                </tbody>
-            </table>
-        </div>
+                </select>
+            </div>
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                <div class="form-group">
+                    <label class="form-label">Month</label>
+                    <select name="month" class="form-select">
+                        <option value="January">January</option>
+                        <option value="February">February</option>
+                        <option value="March">March</option>
+                        <option value="April">April</option>
+                        <option value="May">May</option>
+                        <option value="June">June</option>
+                        <option value="July">July</option>
+                        <option value="August">August</option>
+                        <option value="September">September</option>
+                        <option value="October">October</option>
+                        <option value="November">November</option>
+                        <option value="December">December</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Year</label>
+                    <input type="number" name="year" class="form-input" value="2025" required>
+                </div>
+            </div>
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                <div class="form-group">
+                    <label class="form-label">Bonus</label>
+                    <input type="number" step="0.01" name="bonus" class="form-input" value="0">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Deductions</label>
+                    <input type="number" step="0.01" name="deductions" class="form-input" value="0">
+                </div>
+            </div>
+            <button type="submit" class="btn btn-primary btn-block">Generate Payslip</button>
+        </form>
     </div>
-    {% endblock %}
+</div>
+
+<div class="card">
+    <div class="card-header">
+        <h3 class="card-title">All Employees & Salaries</h3>
+    </div>
+    <div class="table-container">
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Name</th>
+                    <th>Role</th>
+                    <th>Base Salary</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for emp in employees %}
+                <tr>
+                    <td>
+                        <div style="font-weight: 500;">#{{ emp.id }}</div>
+                        <div style="font-size: 0.8em; color: var(--text-muted);">{{ emp.employee_id or '-' }}</div>
+                    </td>
+                    <td>
+                        <div style="font-weight: 500;">{{ emp.name }}</div>
+                        <div style="font-size: 0.8em; color: var(--text-muted);">{{ emp.email }}</div>
+                        <div style="font-size: 0.8em; color: var(--primary);">{{ emp.job_title or '' }}</div>
+                    </td>
+                    <td><span class="badge badge-employee">{{ emp.role }}</span></td>
+                    <td>${{ emp.salary or 0 }}</td>
+                    <td>
+                        <button class="btn btn-sm btn-nav"
+                            onclick="openEditUserModal('{{ emp.id }}', '{{ emp.name }}', '{{ emp.email }}', '{{ emp.role }}', '{{ emp.employee_id or '' }}', '{{ emp.job_title or '' }}', '{{ emp.salary or 0 }}', '{{ emp.phone or '' }}', '{{ emp.address or '' }}')">Edit</button>
+                    </td>
+                </tr>
+                {% else %}
+                <tr>
+                    <td colspan="5" style="text-align: center; color: var(--text-muted);">No employees found.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<!-- Edit User Modal -->
+<div id="editUserModal" class="modal"
+    style="display:none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; overflow: auto; background-color: rgba(0,0,0,0.5);">
+    <div class="modal-content"
+        style="background-color: white; margin: 5% auto; padding: 20px; border-radius: 8px; width: 90%; max-width: 600px; position: relative;">
+        <span onclick="document.getElementById('editUserModal').style.display='none'"
+            style="float: right; font-size: 24px; cursor: pointer;">&times;</span>
+        <h3 style="margin-bottom: 1rem;">Edit Employee Details</h3>
+        <form action="{{ url_for('admin_update_user') }}" method="post">
+            <input type="hidden" name="user_id" id="edit_user_id">
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                <div class="form-group">
+                    <label class="form-label">Full Name</label>
+                    <input type="text" name="name" id="edit_name" class="form-input" required>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Employee ID</label>
+                    <input type="text" name="employee_id" id="edit_employee_id" class="form-input">
+                </div>
+            </div>
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                <div class="form-group">
+                    <label class="form-label">Email</label>
+                    <input type="email" name="email" id="edit_email" class="form-input" required>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Role</label>
+                    <select name="role" id="edit_role" class="form-select">
+                        <option value="employee">Employee</option>
+                        <option value="admin">Admin</option>
+                    </select>
+                </div>
+            </div>
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                <div class="form-group">
+                    <label class="form-label">Job Title</label>
+                    <input type="text" name="job_title" id="edit_job_title" class="form-input">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Phone</label>
+                    <input type="text" name="phone" id="edit_phone" class="form-input">
+                </div>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Address</label>
+                <textarea name="address" id="edit_address" class="form-input" rows="2"></textarea>
+            </div>
+            <button type="submit" class="btn btn-primary btn-block">Save Changes</button>
+        </form>
+    </div>
+</div>
+
+<script>
+    function openEditUserModal(id, name, email, role, empId, jobTitle, salary, phone, address) {
+        document.getElementById('edit_user_id').value = id;
+        document.getElementById('edit_name').value = name;
+        document.getElementById('edit_email').value = email;
+        document.getElementById('edit_role').value = role;
+        document.getElementById('edit_employee_id').value = empId || '';
+        document.getElementById('edit_job_title').value = jobTitle || '';
+        document.getElementById('edit_phone').value = phone || '';
+        document.getElementById('edit_address').value = address || '';
+        document.getElementById('editUserModal').style.display = 'block';
+    }
+</script>
+</tbody>
+</table>
+</div>
+</div>
+{% endblock %}

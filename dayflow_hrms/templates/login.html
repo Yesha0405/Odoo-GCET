@@ -11,15 +11,22 @@
         <div class="alert alert-error">{{ msg }}</div>
         {% endif %}
 
+        <div style="text-align: center; margin-bottom: 2rem;">
+            <div
+                style="background: #2D2D2D; color: #666; padding: 10px; border-radius: 6px; display: inline-block; width: 200px;">
+                App/Web Logo</div>
+        </div>
+
         <form action="{{ url_for('login') }}" method="post">
             <div class="form-group">
-                <label for="email" class="form-label">Email Address</label>
-                <input type="email" name="email" id="email" class="form-input" placeholder="you@company.com" required>
+                <label for="email" class="form-label">Login Id / Email :-</label>
+                <input type="text" name="email" id="email" class="form-input" placeholder="Enter Login ID or Email"
+                    required>
             </div>
 
             <div class="form-group">
-                <label for="password" class="form-label">Password</label>
-                <input type="password" name="password" id="password" class="form-input" placeholder="••••••••" required>
+                <label for="password" class="form-label">Password :-</label>
+                <input type="password" name="password" id="password" class="form-input" required>
             </div>
 
             <button type="submit" class="btn btn-primary btn-block">Sign In</button>
